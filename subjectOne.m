@@ -119,15 +119,6 @@ figure;
 pcshow(merged,VerticalAxis="Y",VerticalAxisDir="Up",MarkerSize=5);
 title("Merged");
 
-% Use Poisson method to construct a surface mesh from the merged point cloud
-depth = 8; % Choose an appropriate depth based on your point cloud's density and desired detail
-[mesh, depthUsed, perVertexDensity] = pc2surfacemesh(merged, "poisson", depth);
-
-% Display the constructed surface mesh
-figure;
-surfaceMeshShow(mesh);
-title('Surface Mesh (Poisson)');
-
 
 
 
