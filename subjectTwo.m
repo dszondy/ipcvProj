@@ -32,9 +32,19 @@ middleUndt = undistortImage(imageMiddle,cameraParamsMiddle);
 rightUndt  = undistortImage(imageRight,cameraParamsRight);
 
 % remove the background
-leftUndt =   removeBackground(leftUndt,10,[]);
-middleUndt = removeBackground(middleUndt,10,[]);
-rightUndt =  removeBackground(rightUndt,10,[]);
+leftUndt =   removeBackground(leftUndt);
+middleUndt = removeBackground(middleUndt);
+rightUndt =  removeBackground(rightUndt);
+
+%leftUndt = blackToWhite(leftUndt);
+%rightUndt = blackToWhite(rightUndt);
+
+
+% normalize
+%bgColor = findDominantColor(middleUndt);
+%leftUndt   = normalizeColor(leftUndt, bgColor);
+%middleUndt = normalizeColor(middleUndt, bgColor);
+%rightUndt  = normalizeColor(rightUndt, bgColor);
 
 % rectify images 
 [middle1, leftRect, prj1] =   rectifyStereoImages(middleUndt,leftUndt,stereoParamsML,OutputView="full");
@@ -98,8 +108,8 @@ title("MR");
 
 % preprocess for merging
 % denoising
-denoisedML = pcdenoise(pointCloudMiddleLeft,"NumNeighbors",80);
-denoisedMR = pcdenoise(pointCloudMiddleRight,"NumNeighbors",80);
+denoisedML = pcdenoise(pointCloudMiddleLeft,"NumNeighbors",400);
+denoisedMR = pcdenoise(pointCloudMiddleRight,"NumNeighbors",400);
 % downsampling and merging
 scale = 1;
 downML = pcdownsample(denoisedML,"random", scale);
@@ -112,32 +122,12 @@ RM = stereoParamsMR.RotationOfCamera2;
 tformI =  affine3d();
 tformI.T(1:3,1:3) = RM/LM; %RR*inv(RL);
 
-[tform, movingML,rmse] = pcregistericp(denoisedML,denoisedMR,MaxIterations=100, InitialTransform=tformI,Metric="planeToPlaneWithColor");
+[tform, movingML,rmse] = pcregistericp(denoisedML,denoisedMR,MaxIterations=100, InitialTransform=tformI,Metric="planeToPlane");
 merged = pcmerge(movingML,denoisedMR,1);
 
 figure;
-pcshow(merged,VerticalAxis="Y",VerticalAxisDir="Up",MarkerSize=5);
+pcshow(merged,VerticalAxis="Y",VerticalAxisDir="Up",MarkerSize=15);
 title("Merged");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
