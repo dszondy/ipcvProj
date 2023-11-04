@@ -20,7 +20,11 @@ imageLocRightsub1   = "subject2/subject2_Right";
 imageLeftsub1   = imageDatastore(imageLocLeftsub1,"FileExtensions",[".jpg" ".png" ".tif"]);
 imageMiddlesub1 = imageDatastore(imageLocMiddlesub1,"FileExtensions",[".jpg", ".png" ".tif"]);
 imageRightsub1  = imageDatastore(imageLocRightsub1,"FileExtensions",[".jpg", ".png" ".tif"]);
+for i=1:4
 
+    if i>2
+        break;
+    end
 % get the left,middle,images
 imageLeft   = readimage(imageLeftsub1,1);
 imageMiddle = readimage(imageMiddlesub1,1);
@@ -93,6 +97,16 @@ disparityMR = interpolate(disparityMR);
 % reconstuct the scene
 xyzMiddleLeft   = reconstructScene(disparityML, prj1);
 xyzMiddleRight  = reconstructScene(disparityMR, prj2);
+% Visualize depth using the surf function
+
+% Display depth from Middle-Left disparity
+figure;
+surf(xyzMiddleLeft(:,:,3),'EdgeColor','none');
+title('Depth from Middle-Left Disparity');
+view(2);  % top-down view
+axis tight;
+colorbar;  % adds a color bar to the figure to indicate depth
+colormap('jet');  % choose a color map
 
 % get point cloud
 pointCloudMiddleLeft   = pointCloud(xyzMiddleLeft,"Color",leftRect);
@@ -105,6 +119,8 @@ title("ML");
 figure;
 pcshow(pointCloudMiddleRight,VerticalAxis="Y",VerticalAxisDir="Up",MarkerSize=5);
 title("MR");
+
+
 
 % preprocess for merging
 % denoising
@@ -122,25 +138,16 @@ RM = stereoParamsMR.RotationOfCamera2;
 tformI =  affine3d();
 tformI.T(1:3,1:3) = RM/LM; %RR*inv(RL);
 
-[tform, movingML,rmse] = pcregistericp(denoisedML,denoisedMR,MaxIterations=100, InitialTransform=tformI,Metric="planeToPlane");
+[tform, movingML,rmse] = pcregistericp(denoisedML,denoisedMR,MaxIterations=100, InitialTransform=tformI,Metric="planeToPlaneWithColor");
 merged = pcmerge(movingML,denoisedMR,1);
 
-figure;
-pcshow(merged,VerticalAxis="Y",VerticalAxisDir="Up",MarkerSize=15);
-title("Merged");
+% smooth the point cloud  and display
+smoothed_cloud = pcmedian(merged,Radius=7);
 
+% surfaceMeshShow(mesh);
+createMesh(smoothed_cloud,1);
 
-
-
-
-
-
-
-
-
-
-
-
+end
 
 
 

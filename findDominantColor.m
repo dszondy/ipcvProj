@@ -23,4 +23,5 @@ function dominantColor = findDominantColor(img)
     
     % Compute the average RGB value of the dominant pixels to get the dominant color
     dominantColor = mean(dominantPixels, 1);
-    dominantColor = uint8(dominantColor
+    dominantColor = uint8(dominantColor);
+end
